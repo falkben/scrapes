@@ -42,29 +42,35 @@ async.mapLimit(
   urls,
   20,
   async function(url) {
-    const response = await rp.get({ uri: url, encoding: "latin1" });
-    return response;
+    const response = await rp.get({
+      uri: url,
+      encoding: "latin1",
+      resolveWithFullResponse: true
+    });
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      return "";
+    }
   },
   (err, results) => {
     if (err) console.log(err);
-    else {
-      var obj = [];
-      Promise.all(results)
-        .then(results => {
-          for (let i = 0; i < results.length; i++) {
-            obj[i] = process_results(results[i], i + 1);
+    var obj = [];
+    Promise.all(results)
+      .then(results => {
+        for (let i = 0; i < results.length; i++) {
+          obj[i] = process_results(results[i], i + 1);
+        }
+      })
+      .then(() => {
+        fs.writeFile("webtender.json", JSON.stringify(obj), "utf8", err => {
+          if (err) {
+            console.error(err);
+            return;
           }
-        })
-        .then(() => {
-          fs.writeFile("webtender.json", JSON.stringify(obj), "utf8", err => {
-            if (err) {
-              console.error(err);
-              return;
-            }
-            console.log("Success");
-          });
-        })
-        .catch(err => console.log(err));
-    }
+          console.log("Success");
+        });
+      })
+      .catch(err => console.log(err));
   }
 );
