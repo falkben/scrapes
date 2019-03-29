@@ -38,9 +38,13 @@ for (let i = 1; i <= max_drinks; i++) {
 }
 
 var ps = [];
-async.mapLimit(urls, 10, function(url, callback) {
-  await ps.push(rp.get({ uri: url, encoding: "latin1" }));
-});
+async.mapLimit(urls, 10, async function(url, callback) {
+  await ps.push(rp.get({ uri: url, encoding: "latin1" }))
+  }, (err, results) => {
+      // results is now an array of the response bodies
+      console.log(err);
+  }
+);
 
 // for (let i = 0; i < urls.length; i++) {
 //   ps.push(rp.get({ uri: url[i], encoding: "latin1" }));
