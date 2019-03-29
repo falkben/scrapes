@@ -31,8 +31,8 @@ function process_results(body, id) {
 }
 
 var urls = [];
-const max_drinks = 20;
-// const max_drinks = 6217;
+// const max_drinks = 20;
+const max_drinks = 6217;
 for (let i = 1; i <= max_drinks; i++) {
   let URL = "https://www.webtender.com/db/drink/" + i;
   urls.push(URL);
@@ -40,30 +40,31 @@ for (let i = 1; i <= max_drinks; i++) {
 
 async.mapLimit(
   urls,
-  5,
+  20,
   async function(url) {
     const response = await rp.get({ uri: url, encoding: "latin1" });
     return response;
   },
   (err, results) => {
-    if (err) throw err;
-
-    var obj = [];
-    Promise.all(results)
-      .then(results => {
-        for (let i = 0; i < results.length; i++) {
-          obj[i] = process_results(results[i], i + 1);
-        }
-      })
-      .then(() => {
-        fs.writeFile("webtender.json", JSON.stringify(obj), "utf8", err => {
-          if (err) {
-            console.error(err);
-            return;
+    if (err) console.log(err);
+    else {
+      var obj = [];
+      Promise.all(results)
+        .then(results => {
+          for (let i = 0; i < results.length; i++) {
+            obj[i] = process_results(results[i], i + 1);
           }
-          console.log("Success");
-        });
-      })
-      .catch(err => console.log(err));
+        })
+        .then(() => {
+          fs.writeFile("webtender.json", JSON.stringify(obj), "utf8", err => {
+            if (err) {
+              console.error(err);
+              return;
+            }
+            console.log("Success");
+          });
+        })
+        .catch(err => console.log(err));
+    }
   }
 );
